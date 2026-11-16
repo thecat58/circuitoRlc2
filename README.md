@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # PROYECTO 2: EL CIRCUITO RLC COMO FILTRO DE AUDIO
 ### Institución Universitaria Colegio Mayor del Cauca
 **Facultad de Ingeniería — Programa de Ingeniería Informática**  
@@ -109,3 +110,6 @@ python circuito_rlc.py
 ## DECLARACIÓN DE USO DE INTELIGENCIA ARTIFICIAL
 
 En esta revisión se utilizó GitHub Copilot como apoyo para contrastar el proyecto con los requisitos del PDF y verificar que la aplicación web cargara localmente. El grupo debe declarar también cualquier otra herramienta de IA que haya utilizado durante la elaboración, revisar los resultados y poder explicar y defender el trabajo.
+=======
+# circuitoRlc2
+>>>>>>> f70fda1eb493d4fc9582cc91df74986acdbcf568
