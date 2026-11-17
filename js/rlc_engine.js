@@ -155,6 +155,58 @@ const RLCEngine = {
     },
 
     /**
+     * Integra una entrada de voltaje arbitraria con RK4 desde reposo.
+     */
+    solveRK4Signal(R, L, C, inputAt, tMax = 1.0, dt = 1.0 / 20000.0) {
+        const N = Math.round(tMax / dt) + 1;
+        const t = new Float64Array(N);
+        const Vc = new Float64Array(N);
+        const I = new Float64Array(N);
+        const Q = new Float64Array(N);
+        const invL = 1.0 / L;
+        const invC = 1.0 / C;
+        let q = 0.0;
+        let i = 0.0;
+
+        const derivatives = (currQ, currI, currT) => [
+            currI,
+            (inputAt(currT) - R * currI - invC * currQ) * invL
+        ];
+
+        for (let step = 0; step < N; step++) {
+            const currT = step * dt;
+            t[step] = currT;
+            Q[step] = q;
+            Vc[step] = q * invC;
+            I[step] = i;
+
+            if (step < N - 1) {
+                const [k1Q, k1I] = derivatives(q, i, currT);
+                const [k2Q, k2I] = derivatives(
+                    q + 0.5 * dt * k1Q,
+                    i + 0.5 * dt * k1I,
+                    currT + 0.5 * dt
+                );
+                const [k3Q, k3I] = derivatives(
+                    q + 0.5 * dt * k2Q,
+                    i + 0.5 * dt * k2I,
+                    currT + 0.5 * dt
+                );
+                const [k4Q, k4I] = derivatives(
+                    q + dt * k3Q,
+                    i + dt * k3I,
+                    currT + dt
+                );
+
+                q += (dt / 6.0) * (k1Q + 2.0 * k2Q + 2.0 * k3Q + k4Q);
+                i += (dt / 6.0) * (k1I + 2.0 * k2I + 2.0 * k3I + k4I);
+            }
+        }
+
+        return { t, Vc, I, Q };
+    },
+
+    /**
      * Solución analítica exacta ante un escalón de voltaje E0 con condiciones de reposo.
      */
     solveAnalytical(R, L, C, E0, tArray) {
@@ -227,5 +279,20 @@ const RLCEngine = {
         }
 
         return { freqs, mag_db, phase_deg, f_n };
+    },
+
+    calculateFrequencyResponse(R, L, C, frequencyHz) {
+        const omega = 2.0 * Math.PI * frequencyHz;
+        const omegaNSquared = 1.0 / (L * C);
+        const real = omegaNSquared - omega * omega;
+        const imag = (R / L) * omega;
+        const gain = omegaNSquared / Math.hypot(real, imag);
+
+        return {
+            frequencyHz,
+            gain,
+            gainDb: 20.0 * Math.log10(gain),
+            phaseDeg: -Math.atan2(imag, real) * (180.0 / Math.PI)
+        };
     }
 };

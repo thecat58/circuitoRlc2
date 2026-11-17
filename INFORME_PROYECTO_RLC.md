@@ -309,10 +309,10 @@ Esta discrepancia del orden de nanovoltios (menor a $0.00000004\%$) verifica rig
 
 #### Figura 2: Comparativa de Regímenes de Amortiguamiento
 Se contrastan las curvas temporales de $V_C(t)$ para las 4 resistencias evaluadas:
-1. **$R = 10\,\Omega$ ($\zeta = 0.10$):** Presenta un sobreimpulso pronunciado que alcanza $20.75\text{ V}$ en $t_p = 31.57\text{ ms}$, seguido de varias oscilaciones antes de estabilizarse en $12\text{ V}$ hacia los $350\text{ ms}$.
-2. **$R = 50\,\Omega$ ($\zeta = 0.50$):** Rápido tiempo de subida con un sobreimpulso controlado de $1.96\text{ V}$ ($16.3\%$), alcanzando el régimen permanente en menos de $80\text{ ms}$.
-3. **$R = 100\,\Omega$ ($\zeta = 1.00$):** Régimen críticamente amortiguado. La tensión sube de manera monótona sin cruzar jamás los $12\text{ V}$ ni oscilar, ingresando a la banda del $\pm 2\%$ en $t \approx 40\text{ ms}$. Es el tiempo de respuesta libre de sobreimpulso más veloz.
-4. **$R = 200\,\Omega$ ($\zeta = 2.00$):** Régimen sobreamortiguado. La respuesta es notablemente lenta debido al polo dominante $r_1 = -26.79\text{ s}^{-1}$, tardando más de $150\text{ ms}$ en alcanzar el $98\%$ del valor final.
+1. **$R = 10\,\Omega$ ($\zeta = 0.10$):** Presenta un sobreimpulso pronunciado que alcanza $20.75\text{ V}$ en $t_p = 31.57\text{ ms}$, seguido de varias oscilaciones; con criterio de asentamiento del $\pm2\%$, se estabiliza aproximadamente a los $384\text{ ms}$.
+2. **$R = 50\,\Omega$ ($\zeta = 0.50$):** Rápido tiempo de subida con un sobreimpulso controlado de $1.96\text{ V}$ ($16.3\%$), alcanzando el régimen permanente aproximadamente a los $81\text{ ms}$.
+3. **$R = 100\,\Omega$ ($\zeta = 1.00$):** Régimen críticamente amortiguado. La tensión sube de manera monótona sin cruzar jamás los $12\text{ V}$ ni oscilar, ingresando a la banda del $\pm 2\%$ en $t \approx 58\text{ ms}$. Es el tiempo de respuesta libre de sobreimpulso más veloz.
+4. **$R = 200\,\Omega$ ($\zeta = 2.00$):** Régimen sobreamortiguado. La respuesta es notablemente lenta debido al polo dominante $r_1 = -26.79\text{ s}^{-1}$, tardando aproximadamente $149\text{ ms}$ en entrar y permanecer en la banda del $\pm2\%$ del valor final.
 
 ![Comparativa de Regímenes](figura2_comparativa_regimenes_amortiguamiento.png)
 
@@ -324,7 +324,6 @@ $$E(t) = \sin(2\pi \cdot 5 t) + \sin(2\pi \cdot 50 t) + \sin(2\pi \cdot 500 t)$$
 constituida por una frecuencia grave ($5\text{ Hz}$), una media ($50\text{ Hz}$) y una aguda ($500\text{ Hz}$).
 
 Al atravesar el circuito con $R = 50\,\Omega$ ($\omega_n = 100\text{ rad/s} \implies f_n \approx 15.9\text{ Hz}$):
-* **Componente de $5\text{ Hz}$ ($f < f_n$):** Pasa prácticamente sin alteración de amplitud ($\text{Ganancia} \approx 0.0\text{ dB}$).
 * **Componente de $5\text{ Hz}$:** La ganancia es aproximadamente $+0.4\text{ dB}$ (casi unitaria, con un leve realce).
 * **Componente de $50\text{ Hz}$ ($f \approx 3.14 f_n$):** Cae fuertemente, con una atenuación aproximada de $\mathbf{-19.5\text{ dB}}$ (salida cercana al $10.6\%$ de la amplitud de entrada).
 * **Componente de $500\text{ Hz}$ ($f \approx 31.4 f_n$):** Se atenúa aproximadamente $\mathbf{-59.9\text{ dB}}$ (salida cercana al $0.1\%$ de la amplitud de entrada).
@@ -391,8 +390,7 @@ En el diseño de un filtro de audio o control de tono analógico en ingeniería 
   Es el amortiguamiento crítico. Garantiza la respuesta temporal más rápida posible sin sobreimpulso ni ringing ($M_p = 0\%$). En filtros de corte o protección de etapas de potencia de audio, es la opción ideal si se busca evitar cualquier coloración espectral espuria.
 * **$R \approx 70.7\,\Omega$ ($\zeta = \frac{1}{\sqrt{2}} \approx 0.707$):** **ELECCIÓN PARA UNA RESPUESTA DE AMPLITUD BUTTERWORTH.**
   Corresponde a la alineación Butterworth, cuya magnitud es máximamente plana en la banda de paso y no presenta pico resonante. Proporciona:
-  - Magnitud cercana a $0\text{ dB}$ en la banda de paso, con caída a $-3\text{ dB}$ en $\omega = \omega_n$.
-  - El punto de corte a $-3\text{ dB}$ ocurre exactamente en $\omega = \omega_n$.
+  - Magnitud cercana a $0\text{ dB}$ en la banda de paso, con el punto de $-3\text{ dB}$ exactamente en $\omega = \omega_n$.
   - La alineación Butterworth no implica retardo de grupo constante ni fase sin distorsión; su ventaja aquí es la respuesta de amplitud plana.
 
 **Dictamen Técnico Final:**

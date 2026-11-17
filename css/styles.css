@@ -400,6 +400,18 @@ body {
   margin-bottom: 1.5rem;
 }
 
+.rubric-point {
+  margin: 0.65rem 0 1rem;
+  padding: 0.6rem 0.8rem;
+  border-left: 3px solid var(--accent-rose);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: rgba(251, 113, 133, 0.08);
+  color: var(--accent-rose);
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.55;
+}
+
 /* ==========================================================================
    SECCIÓN 1: INICIO Y PORTADA
    ========================================================================== */
@@ -813,6 +825,104 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.figure-card-wide {
+  grid-column: 1 / -1;
+}
+
+.figure-chart-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 0.7rem 1rem;
+  background: #050811;
+  color: #cbd5e1;
+  font-size: 0.82rem;
+}
+
+.figure-chart-controls select {
+  padding: 0.35rem 0.55rem;
+  color: #f1f5f9;
+  background: #111827;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 6px;
+}
+
+.figure-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  padding: 0 1rem 0.8rem;
+  background: #050811;
+}
+
+.figure-chart-panel {
+  position: relative;
+  min-width: 0;
+  height: 300px;
+  padding: 0.65rem;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+}
+
+.figure-chart-panel-wide {
+  height: 380px;
+  margin: 0 1rem 0.8rem;
+}
+
+.multitone-status {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+.figure-status {
+  color: var(--accent-cyan);
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.simulation-table {
+  width: 100%;
+  margin-top: 0.65rem;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 0.82rem;
+}
+
+.simulation-table th,
+.simulation-table td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid var(--border-glass);
+  white-space: nowrap;
+}
+
+.simulation-table th {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.simulation-table td {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+@media (max-width: 860px) {
+  .figure-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .figure-chart-panel {
+    height: 280px;
+  }
 }
 
 .figure-img-wrap {

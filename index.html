@@ -131,7 +131,7 @@
                     <div class="member-avatar">JA</div>
                     <div class="member-info">
                         <h4>Jessica Vanesa Acosta Galindez</h4>
-                        <div class="member-role">Planteamiento Físico & Deducción</div>
+                        <div class="member-role">Matemática: Modelo Físico & Regímenes</div>
                         <div class="member-time"><i data-lucide="clock"></i> Minuto 00:00 - 03:45</div>
                     </div>
                 </div>
@@ -140,7 +140,7 @@
                     <div class="member-avatar">KB</div>
                     <div class="member-info">
                         <h4>Kevin Daniel Bermudez Zamora</h4>
-                        <div class="member-role">Solución Analítica & Analogía</div>
+                        <div class="member-role">Matemática: Solución Exacta & Analogía</div>
                         <div class="member-time"><i data-lucide="clock"></i> Minuto 03:45 - 07:30</div>
                     </div>
                 </div>
@@ -149,7 +149,7 @@
                     <div class="member-avatar">AL</div>
                     <div class="member-info">
                         <h4>Alvaro Jose Lopez Quira</h4>
-                        <div class="member-role">Computación Científica & RK4</div>
+                        <div class="member-role">Código: RK4 & Validación</div>
                         <div class="member-time"><i data-lucide="clock"></i> Minuto 07:30 - 11:15</div>
                     </div>
                 </div>
@@ -158,7 +158,7 @@
                     <div class="member-avatar">JM</div>
                     <div class="member-info">
                         <h4>Jorge Enrique Muñoz Dulcey</h4>
-                        <div class="member-role">Análisis de Audio, Bode & Cierre</div>
+                        <div class="member-role">Código y Aplicación: Web, Audio & Bode</div>
                         <div class="member-time"><i data-lucide="clock"></i> Minuto 11:15 - 15:00</div>
                     </div>
                 </div>
@@ -317,6 +317,7 @@
         <section id="tab-simulador" class="tab-pane">
             <h2 class="section-title">Laboratorio Virtual RLC en Tiempo Real (Algoritmo RK4)</h2>
             <p class="section-subtitle">Manipula los parámetros físicos del circuito con respuesta fluida a 60 FPS:</p>
+            <p class="rubric-point">Aclaración: sí, esta gráfica muestra V<sub>C</sub> respecto al tiempo: eje horizontal = t [ms] y eje vertical = V<sub>C</sub>(t) [V]. Aquí ves el valor de R seleccionado; la comparación conjunta de las cuatro resistencias está en la Figura 2, Punto 1.</p>
 
             <div class="simulator-layout">
                 <!-- Panel de Controles -->
@@ -426,55 +427,120 @@
              PESTAÑA 4: GALERÍA CIENTÍFICA & DIAGRAMA DE BODE
              ================================================================ -->
         <section id="tab-galeria" class="tab-pane">
-            <h2 class="section-title">Galería Científica de Gráficas de Publicación (300 DPI)</h2>
-            <p class="section-subtitle">Figuras generadas por el pipeline de computación científica en Python (`circuito_rlc.py`):</p>
+            <h2 class="section-title">Simulaciones y Gráficas Interactivas</h2>
+            <p class="section-subtitle">Las gráficas se calculan en el navegador con los parámetros del circuito; usa los controles y tooltips para explorar los resultados.</p>
 
             <div class="gallery-grid">
                 <!-- Figura 1 -->
-                <div class="figure-card">
-                    <div class="figure-img-wrap">
-                        <img src="figura1_validacion_rk4_vs_analitica.png" alt="Figura 1: Validación RK4 vs Analítica" class="figure-img">
-                        <div class="figure-zoom-overlay"><i data-lucide="maximize-2"></i> Clic para pantalla completa</div>
+                <div class="figure-card figure-card-wide">
+                    <div class="figure-chart-controls">
+                        <label for="validationDt">Paso RK4 (dt):</label>
+                        <select id="validationDt" aria-label="Paso temporal de la validación RK4">
+                            <option value="0.0001" selected>0.10 ms</option>
+                            <option value="0.00005">0.05 ms</option>
+                            <option value="0.00002">0.02 ms</option>
+                        </select>
+                    </div>
+                    <div class="figure-chart-grid">
+                        <div class="figure-chart-panel">
+                            <canvas id="chartValidation" role="img" aria-label="Comparación calculada entre Vc analítico y RK4"></canvas>
+                        </div>
+                        <div class="figure-chart-panel">
+                            <canvas id="chartValidationError" role="img" aria-label="Error absoluto en nanovoltios de la integración RK4"></canvas>
+                        </div>
                     </div>
                     <div class="figure-caption">
                         <h4>Figura 1: Validación Analítica vs. Numérica RK4</h4>
-                        <p>Superposición exacta de la solución calculada a mano vs. la simulación RK4 ($h = 0.1\text{ ms}$) para $R = 10\,\Omega$. El panel inferior demuestra un error máximo de $\|V_{C,\text{num}} - V_{C,\text{analit}}\|_\infty = \mathbf{3.69 \times 10^{-9}\text{ V}}$ (escala de nanovoltios).</p>
+                        <p>Compara la solución analítica y RK4 para el escalón de 12 V. Cambia dt y observa cómo varía el error máximo.</p>
+                        <p id="validationStatus" class="figure-status" role="status"></p>
                     </div>
                 </div>
 
                 <!-- Figura 2 -->
-                <div class="figure-card">
-                    <div class="figure-img-wrap">
-                        <img src="figura2_comparativa_regimenes_amortiguamiento.png" alt="Figura 2: Comparativa de Regímenes" class="figure-img">
-                        <div class="figure-zoom-overlay"><i data-lucide="maximize-2"></i> Clic para pantalla completa</div>
+                <div class="figure-card figure-card-wide">
+                    <div class="figure-chart-controls">
+                        <label for="stepDuration">Ventana de simulación:</label>
+                        <select id="stepDuration" aria-label="Duración de la gráfica de respuesta al escalón">
+                            <option value="0.25">250 ms</option>
+                            <option value="0.5" selected>500 ms</option>
+                        </select>
+                    </div>
+                    <div class="figure-chart-panel figure-chart-panel-wide">
+                        <canvas id="chartStepResponses" role="img" aria-label="Respuestas al escalón de 12 voltios para las cuatro resistencias"></canvas>
                     </div>
                     <div class="figure-caption">
-                        <h4>Figura 2: Dinámicas para R = 10, 50, 100 y 200 Ω</h4>
-                        <p>Contraste transitorio ante escalón de 12 V: desde la fuerte oscilación subamortiguada del 72.9% ($10\,\Omega$) hasta el amortiguamiento crítico óptimo libre de sobreimpulso ($100\,\Omega$) y la lentitud del régimen sobreamortiguado ($200\,\Omega$).</p>
+                        <h4>Figura 2: Respuestas al Escalón y Métricas</h4>
+                        <p class="rubric-point">Punto 1 de la guía: V<sub>C</sub>(t) frente al tiempo para R = 10, 50, 100 y 200 Ω; se aprecia el sobreimpulso con R = 10 Ω.</p>
+                        <div class="table-scroll">
+                            <table class="simulation-table">
+                                <thead>
+                                    <tr><th>R [Ω]</th><th>Pico V<sub>C</sub> [V]</th><th>Sobreimpulso [%]</th><th>Tiempo al pico [ms]</th><th>Asentamiento ±2% [ms]</th></tr>
+                                </thead>
+                                <tbody id="stepMetrics"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Figura 3 -->
-                <div class="figure-card">
-                    <div class="figure-img-wrap">
-                        <img src="figura3_filtrado_senal_multitono.png" alt="Figura 3: Filtrado Multi-tono" class="figure-img">
-                        <div class="figure-zoom-overlay"><i data-lucide="maximize-2"></i> Clic para pantalla completa</div>
+                <div class="figure-card figure-card-wide">
+                    <div class="figure-chart-controls">
+                        <label for="multitoneResistance">Resistencia R:</label>
+                        <select id="multitoneResistance" aria-label="Resistencia del circuito para la señal multitono">
+                            <option value="10">10 Ω</option>
+                            <option value="50" selected>50 Ω</option>
+                            <option value="100">100 Ω</option>
+                            <option value="200">200 Ω</option>
+                        </select>
+                    </div>
+                    <div class="figure-chart-grid">
+                        <div class="figure-chart-panel">
+                            <canvas id="chartMultitone" role="img" aria-label="Entrada multitono y voltaje del condensador calculados con RK4"></canvas>
+                        </div>
+                        <div class="figure-chart-panel">
+                            <canvas id="chartMultitoneSpectrum" role="img" aria-label="Espectro calculado en el navegador para la entrada y salida multitono"></canvas>
+                        </div>
                     </div>
                     <div class="figure-caption">
-                        <h4>Figura 3: Filtrado de Señal Multi-seno (5, 50 y 500 Hz)</h4>
-                        <p>Entrada $E(t)$ vs. salida $V_C(t)$ y espectro FFT para $R=50\,\Omega$: $5\text{ Hz}$ tiene una ganancia aproximada de $+0.4\text{ dB}$, $50\text{ Hz}$ se atenúa $-19.5\text{ dB}$ y $500\text{ Hz}$, $-59.9\text{ dB}$.</p>
+                        <h4>Figura 3: Señal Multitono y Espectro Calculados en el Navegador</h4>
+                        <p class="rubric-point">Punto 2 de la guía: la web integra la suma de senos de 5, 50 y 500 Hz con RK4 y dibuja la entrada E(t) y la salida V<sub>C</sub>(t). Cambia R para recalcular la respuesta.</p>
+                        <p id="multitoneStatus" class="multitone-status" role="status"></p>
                     </div>
                 </div>
 
                 <!-- Figura 4 -->
-                <div class="figure-card">
-                    <div class="figure-img-wrap">
-                        <img src="figura4_diagrama_bode_filtro_audio.png" alt="Figura 4: Diagrama de Bode" class="figure-img">
-                        <div class="figure-zoom-overlay"><i data-lucide="maximize-2"></i> Clic para pantalla completa</div>
+                <div class="figure-card figure-card-wide">
+                    <div class="figure-chart-controls">
+                        <label for="bodeResistance">Curvas de resistencia:</label>
+                        <select id="bodeResistance" aria-label="Selecciona las curvas de resistencia del diagrama de Bode">
+                            <option value="all" selected>Comparar todas</option>
+                            <option value="10">10 Ω</option>
+                            <option value="50">50 Ω</option>
+                            <option value="100">100 Ω</option>
+                            <option value="200">200 Ω</option>
+                        </select>
+                    </div>
+                    <div class="figure-chart-grid">
+                        <div class="figure-chart-panel">
+                            <canvas id="chartBodeMagnitude" role="img" aria-label="Magnitud de la respuesta en frecuencia en escala logarítmica"></canvas>
+                        </div>
+                        <div class="figure-chart-panel">
+                            <canvas id="chartBodePhase" role="img" aria-label="Fase de la respuesta en frecuencia en escala logarítmica"></canvas>
+                        </div>
                     </div>
                     <div class="figure-caption">
-                        <h4>Figura 4: Diagrama de Bode en Magnitud y Fase</h4>
-                        <p>Función de transferencia $H(j\omega) = V_C/E$. Demuestra rigurosamente la pendiente asintótica de caída de $\mathbf{-40\text{ dB/década}}$ ($-12\text{ dB/octava}$) y el desfase de $-90^\circ$ en la frecuencia de corte $f_n \approx 15.9\text{ Hz}$.</p>
+                        <h4>Figura 4: Diagrama de Bode y Ganancias Puntuales</h4>
+                        <p class="rubric-point">Punto 3 de la guía: ganancia |V<sub>C</sub>|/|E| en función de la frecuencia, con eje de frecuencia logarítmico; las frecuencias altas se atenúan.</p>
+                        <p>Función de transferencia H(jω) = V<sub>C</sub>/E. La magnitud está en dB y la frecuencia en Hz (escala logarítmica). La tabla muestra la ganancia calculada en 5, 50 y 500 Hz.</p>
+                        <div class="table-scroll">
+                            <table class="simulation-table">
+                                <thead>
+                                    <tr><th>R [Ω]</th><th>Ganancia a 5 Hz [dB]</th><th>Ganancia a 50 Hz [dB]</th><th>Ganancia a 500 Hz [dB]</th></tr>
+                                </thead>
+                                <tbody id="bodeMetrics"></tbody>
+                            </table>
+                        </div>
+                        <p id="bodeStatus" class="figure-status" role="status"></p>
                     </div>
                 </div>
             </div>
@@ -578,6 +644,7 @@
 
             <!-- Tabla de Correspondencias -->
             <div class="glass-card" style="margin-top: 1.25rem;">
+                <p class="rubric-point">Punto 4 de la guía: tabla de analogía completa entre el sistema masa–resorte–amortiguador y el circuito RLC.</p>
                 <h3 style="font-size: 1.1rem; color: #fff; margin-bottom: 0.8rem;">Cuadro Comparativo de Isomorfismo Matemático</h3>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left;">

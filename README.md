@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # PROYECTO 2: EL CIRCUITO RLC COMO FILTRO DE AUDIO
 ### Institución Universitaria Colegio Mayor del Cauca
 **Facultad de Ingeniería — Programa de Ingeniería Informática**  
@@ -62,15 +61,20 @@ Luego abre `http://localhost:8000` en Google Chrome, Microsoft Edge o Firefox. U
 1. **Simulador RK4 con Superposición Analítica en Vivo:**
    - Sliders de $R, L, C$ y $E_0$ a 60 FPS fijos.
    - Botón *"Superponer Analítica"* que calcula el error residual de convergencia en nanovoltios ($L_\infty \approx 3.69\text{ nV}$).
-2. **Diagrama de Polos en el Plano Complejo $s$ (Lugar de las Raíces):**
+2. **Gráficas de la galería simuladas en la web:**
+   - Validación analítica/RK4 con selección de $dt$ y lectura del error.
+   - Respuesta al escalón para cuatro valores de $R$, con cálculo de sobreimpulso, tiempo al pico y asentamiento.
+   - Señal multitono y espectro actualizados al cambiar $R$.
+   - Diagrama de Bode logarítmico con magnitud, fase y ganancias puntuales en 5, 50 y 500 Hz.
+3. **Diagrama de Polos en el Plano Complejo $s$ (Lugar de las Raíces):**
    - Muestra las raíces $s_{1,2} = -\alpha \pm \sqrt{\alpha^2 - \omega_n^2}$ moviéndose dinámicamente y el semiplano izquierdo de estabilidad de Lyapunov.
-3. **Laboratorio de Audio Sensorial:**
+4. **Laboratorio de Audio Sensorial:**
    - Sintetizador polifónico en vivo con corte acústico instantáneo.
    - **Micrófono en Vivo:** Permite hablar y escuchar la voz en tiempo real filtrada "bajo el agua".
    - **Carga de Archivo Propio:** Permite subir canciones MP3/WAV para escucharlas a través del filtro pasa-bajo de Web Audio.
-4. **Teleprónter Oficial de 15 Minutos:**
+5. **Teleprónter Oficial de 15 Minutos:**
    - Cronómetro regresivo con barra de progreso y cambio automático del expositor en turno.
-5. **Control por Teclado:**
+6. **Control por Teclado:**
    - `←` / `→` Cambiar pestañas • `Espacio` Pausar/Iniciar cronómetro • `P` Modo Presentación Pantalla Completa • `R` Reiniciar 15:00.
 
 ---
@@ -110,6 +114,7 @@ python circuito_rlc.py
 ## DECLARACIÓN DE USO DE INTELIGENCIA ARTIFICIAL
 
 En esta revisión se utilizó GitHub Copilot como apoyo para contrastar el proyecto con los requisitos del PDF y verificar que la aplicación web cargara localmente. El grupo debe declarar también cualquier otra herramienta de IA que haya utilizado durante la elaboración, revisar los resultados y poder explicar y defender el trabajo.
-=======
-# circuitoRlc2
->>>>>>> f70fda1eb493d4fc9582cc91df74986acdbcf568
+
+## ANTES DE ENTREGAR
+
+La guía solicita la deducción hecha a mano: adjunten las páginas manuscritas o su escaneo; el desarrollo digitado del informe no la sustituye. Verifiquen también que cada integrante exponga y pueda explicar su parte.

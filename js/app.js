@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. Inicializar Simulador RK4, Superposición y Plano s
     initSimulator();
+    initBrowserFigures();
 
     // 4. Inicializar Temporizador de Defensa de 15 Minutos
     initDefenseTimer();
@@ -84,6 +85,10 @@ function initTabNavigation() {
                 }
             }
 
+            if (targetId === "tab-galeria" && galleryCharts.length) {
+                requestAnimationFrame(() => galleryCharts.forEach(chart => chart.resize()));
+            }
+
             // Gestión de bucles de animación para liberar CPU/GPU
             if (targetId !== "tab-analogia" && AnalogiaCanvas.isRunning) {
                 AnalogiaCanvas.pause();
@@ -107,6 +112,14 @@ function initTabNavigation() {
 let rk4Chart = null;
 let rafPending = false;
 let showAnalytical = false;
+let galleryCharts = [];
+let validationChart = null;
+let validationErrorChart = null;
+let stepResponseChart = null;
+let multitoneChart = null;
+let multitoneSpectrumChart = null;
+let bodeMagnitudeChart = null;
+let bodePhaseChart = null;
 
 function initSimulator() {
     const sliderR = document.getElementById("sliderR");
@@ -347,6 +360,441 @@ function initSimulator() {
 
     // Ejecutar simulación inicial
     executeSimulation();
+}
+
+function initBrowserFigures() {
+    initValidationFigure();
+    initStepFigure();
+    initMultitoneFigure();
+    initBodeFigure();
+}
+
+function createFigureChart(canvasId, config) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+
+    const chart = new Chart(canvas.getContext("2d"), config);
+    galleryCharts.push(chart);
+    return chart;
+}
+
+function makeFigureLineOptions(xTitle, yTitle, xType = "linear") {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        parsing: false,
+        interaction: { mode: "nearest", intersect: false },
+        scales: {
+            x: {
+                type: xType,
+                title: { display: true, text: xTitle, color: "#94a3b8" },
+                grid: { color: "rgba(255, 255, 255, 0.06)" },
+                ticks: { color: "#94a3b8", maxTicksLimit: 9 }
+            },
+            y: {
+                title: { display: true, text: yTitle, color: "#94a3b8" },
+                grid: { color: "rgba(255, 255, 255, 0.06)" },
+                ticks: { color: "#94a3b8" }
+            }
+        },
+        plugins: {
+            legend: { labels: { color: "#f1f5f9" } },
+            tooltip: {
+                callbacks: {
+                    label: context =>
+                        `${context.dataset.label}: ${context.parsed.y.toFixed(3)}`
+                }
+            }
+        }
+    };
+}
+
+function initValidationFigure() {
+    const dtSelect = document.getElementById("validationDt");
+    const responseOptions = makeFigureLineOptions("Tiempo [ms]", "V_C(t) [V]");
+    responseOptions.scales.x.min = 0;
+    responseOptions.scales.x.max = 400;
+    responseOptions.scales.y.suggestedMin = 0;
+    responseOptions.scales.y.suggestedMax = 23;
+
+    validationChart = createFigureChart("chartValidation", {
+        type: "line",
+        data: {
+            datasets: [
+                { label: "Solución analítica", data: [], borderColor: "#cbd5e1", borderDash: [5, 4], borderWidth: 1.8, pointRadius: 0 },
+                { label: "RK4", data: [], borderColor: "#38bdf8", borderWidth: 1.8, pointRadius: 0 }
+            ]
+        },
+        options: responseOptions
+    });
+
+    const errorOptions = makeFigureLineOptions("Tiempo [ms]", "Error absoluto [nV]");
+    errorOptions.scales.x.min = 0;
+    errorOptions.scales.x.max = 400;
+    errorOptions.scales.y.min = 0;
+    validationErrorChart = createFigureChart("chartValidationError", {
+        type: "line",
+        data: { datasets: [{ label: "Error absoluto", data: [], borderColor: "#f59e0b", borderWidth: 1.5, pointRadius: 0 }] },
+        options: errorOptions
+    });
+
+    if (!dtSelect || !validationChart || !validationErrorChart) return;
+
+    const updateValidation = () => {
+        const dt = Number(dtSelect.value);
+        const solution = RLCEngine.solveRK4(10, 0.5, 200e-6, 12, 0.4, dt);
+        const exact = RLCEngine.solveAnalytical(10, 0.5, 200e-6, 12, solution.t);
+        const numericalData = [];
+        const exactData = [];
+        const errorData = [];
+        let maxError = 0;
+        const stride = Math.max(1, Math.ceil(solution.t.length / 3000));
+
+        for (let i = 0; i < solution.t.length; i++) {
+            const timeMs = solution.t[i] * 1000;
+            const error = Math.abs(solution.Vc[i] - exact[i]);
+            maxError = Math.max(maxError, error);
+
+            if (i % stride === 0 || i === solution.t.length - 1) {
+                numericalData.push({ x: timeMs, y: solution.Vc[i] });
+                exactData.push({ x: timeMs, y: exact[i] });
+                errorData.push({ x: timeMs, y: error * 1e9 });
+            }
+        }
+
+        validationChart.data.datasets[0].data = exactData;
+        validationChart.data.datasets[1].data = numericalData;
+        validationChart.update("none");
+
+        validationErrorChart.data.datasets[0].data = errorData;
+        validationErrorChart.options.scales.y.max = Math.max(1, maxError * 1e9 * 1.1);
+        validationErrorChart.update("none");
+
+        document.getElementById("validationStatus").textContent =
+            `R = 10 Ω • E₀ = 12 V • dt = ${(dt * 1000).toFixed(2)} ms • ` +
+            `error máximo = ${(maxError * 1e9).toFixed(3)} nV`;
+    };
+
+    dtSelect.addEventListener("change", updateValidation);
+    updateValidation();
+}
+
+function initStepFigure() {
+    const durationSelect = document.getElementById("stepDuration");
+    const resistances = [10, 50, 100, 200];
+    const colors = ["#ef4444", "#f59e0b", "#22c55e", "#38bdf8"];
+    const options = makeFigureLineOptions("Tiempo [ms]", "V_C(t) [V]");
+    options.scales.x.min = 0;
+    options.scales.y.min = 0;
+    options.scales.y.suggestedMax = 23;
+
+    stepResponseChart = createFigureChart("chartStepResponses", {
+        type: "line",
+        data: {
+            datasets: [
+                ...resistances.map((R, index) => ({
+                    label: `R = ${R} Ω`,
+                    data: [],
+                    borderColor: colors[index],
+                    borderWidth: 2,
+                    pointRadius: 0
+                })),
+                {
+                    label: "Estado permanente: 12 V",
+                    data: [],
+                    borderColor: "rgba(255, 255, 255, 0.65)",
+                    borderDash: [4, 4],
+                    borderWidth: 1.2,
+                    pointRadius: 0
+                }
+            ]
+        },
+        options
+    });
+    if (!durationSelect || !stepResponseChart) return;
+
+    const updateStepResponses = () => {
+        const tMax = Number(durationSelect.value);
+        const dt = 0.0001;
+        let tableRows = "";
+        let highestVoltage = 12;
+
+        resistances.forEach((R, index) => {
+            const solution = RLCEngine.solveRK4(R, 0.5, 200e-6, 12, tMax, dt);
+            const data = [];
+            let peak = -Infinity;
+            let peakIndex = 0;
+            let lastOutsideBand = -1;
+
+            for (let i = 0; i < solution.t.length; i++) {
+                const voltage = solution.Vc[i];
+                data.push({ x: solution.t[i] * 1000, y: voltage });
+                if (voltage > peak) {
+                    peak = voltage;
+                    peakIndex = i;
+                }
+                if (Math.abs(voltage - 12) > 0.24) lastOutsideBand = i;
+            }
+
+            stepResponseChart.data.datasets[index].data = data;
+            highestVoltage = Math.max(highestVoltage, peak);
+
+            const overshoot = Math.max(0, (peak - 12) / 12 * 100);
+            const peakTime = overshoot > 0.01
+                ? `${(solution.t[peakIndex] * 1000).toFixed(1)}`
+                : "—";
+            const settlingTime = lastOutsideBand === solution.t.length - 1
+                ? `> ${(tMax * 1000).toFixed(0)}`
+                : `${(solution.t[Math.max(0, lastOutsideBand + 1)] * 1000).toFixed(1)}`;
+
+            tableRows += `<tr><td>${R}</td><td>${peak.toFixed(2)}</td><td>${overshoot.toFixed(1)}</td><td>${peakTime}</td><td>${settlingTime}</td></tr>`;
+        });
+
+        stepResponseChart.options.scales.x.max = tMax * 1000;
+        stepResponseChart.options.scales.y.max = Math.max(22, highestVoltage * 1.05);
+        stepResponseChart.data.datasets[4].data = [
+            { x: 0, y: 12 },
+            { x: tMax * 1000, y: 12 }
+        ];
+        stepResponseChart.update("none");
+        document.getElementById("stepMetrics").innerHTML = tableRows;
+    };
+
+    durationSelect.addEventListener("change", updateStepResponses);
+    updateStepResponses();
+}
+
+function initMultitoneFigure() {
+    const resistanceSelect = document.getElementById("multitoneResistance");
+    const dt = 1.0 / 20000.0;
+    const tMax = 0.6;
+    const displayStart = 0.2;
+    const frequencies = [5, 50, 500];
+    const multitoneInput = t =>
+        Math.sin(2.0 * Math.PI * 5.0 * t) +
+        Math.sin(2.0 * Math.PI * 50.0 * t) +
+        Math.sin(2.0 * Math.PI * 500.0 * t);
+
+    const timeOptions = makeFigureLineOptions("Tiempo relativo [ms]", "Voltaje [V]");
+    timeOptions.scales.x.min = 0;
+    timeOptions.scales.x.max = (tMax - displayStart) * 1000;
+    timeOptions.scales.y.suggestedMin = -3.2;
+    timeOptions.scales.y.suggestedMax = 3.2;
+    multitoneChart = createFigureChart("chartMultitone", {
+        type: "line",
+        data: {
+            datasets: [
+                { label: "Entrada E(t) [V]", data: [], borderColor: "#cbd5e1", borderDash: [5, 4], borderWidth: 1.4, pointRadius: 0 },
+                { label: "Salida V_C(t) [V]", data: [], borderColor: "#38bdf8", borderWidth: 2, pointRadius: 0 }
+            ]
+        },
+        options: timeOptions
+    });
+
+    multitoneSpectrumChart = createFigureChart("chartMultitoneSpectrum", {
+        type: "bar",
+        data: {
+            labels: frequencies.map(f => `${f} Hz`),
+            datasets: [
+                { label: "Entrada [V]", data: [], backgroundColor: "rgba(203, 213, 225, 0.75)" },
+                { label: "Salida [V]", data: [], backgroundColor: "rgba(56, 189, 248, 0.85)" }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+                x: {
+                    title: { display: true, text: "Frecuencia [Hz]", color: "#94a3b8" },
+                    ticks: { color: "#94a3b8" },
+                    grid: { display: false }
+                },
+                y: {
+                    type: "logarithmic",
+                    min: 0.0001,
+                    max: 1.5,
+                    title: { display: true, text: "Amplitud [V], escala logarítmica", color: "#94a3b8" },
+                    ticks: { color: "#94a3b8" },
+                    grid: { color: "rgba(255, 255, 255, 0.06)" }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: "#f1f5f9" } },
+                tooltip: {
+                    callbacks: {
+                        label: context => `${context.dataset.label}: ${context.parsed.y.toFixed(4)} V`
+                    }
+                }
+            }
+        }
+    });
+    if (!resistanceSelect || !multitoneChart || !multitoneSpectrumChart) return;
+
+    const updateChart = () => {
+        const R = Number(resistanceSelect.value);
+        const solution = RLCEngine.solveRK4Signal(
+            R, 0.5, 200e-6, multitoneInput, tMax, dt
+        );
+        const inputData = [];
+        const outputData = [];
+        const inputAmplitudes = [];
+        const outputAmplitudes = [];
+        const gainsDb = [];
+
+        for (let i = 0; i < solution.t.length; i++) {
+            const time = solution.t[i];
+            if (time < displayStart || time > tMax) continue;
+
+            const x = (time - displayStart) * 1000;
+            inputData.push({ x, y: multitoneInput(time) });
+            outputData.push({ x, y: solution.Vc[i] });
+        }
+
+        frequencies.forEach(frequency => {
+            let inputSin = 0;
+            let inputCos = 0;
+            let outputSin = 0;
+            let outputCos = 0;
+            let sampleCount = 0;
+
+            for (let i = 0; i < solution.t.length; i++) {
+                const time = solution.t[i];
+                if (time < displayStart || time >= tMax) continue;
+
+                const phase = 2.0 * Math.PI * frequency * time;
+                const sine = Math.sin(phase);
+                const cosine = Math.cos(phase);
+                inputSin += multitoneInput(time) * sine;
+                inputCos += multitoneInput(time) * cosine;
+                outputSin += solution.Vc[i] * sine;
+                outputCos += solution.Vc[i] * cosine;
+                sampleCount++;
+            }
+
+            const inputAmplitude = 2.0 * Math.hypot(inputSin, inputCos) / sampleCount;
+            const outputAmplitude = 2.0 * Math.hypot(outputSin, outputCos) / sampleCount;
+            inputAmplitudes.push(inputAmplitude);
+            outputAmplitudes.push(outputAmplitude);
+            gainsDb.push(20.0 * Math.log10(outputAmplitude / inputAmplitude));
+        });
+
+        multitoneChart.data.datasets[0].data = inputData;
+        multitoneChart.data.datasets[1].data = outputData;
+        multitoneChart.data.datasets[1].label = `Salida V_C(t), R = ${R} Ω`;
+        multitoneChart.update("none");
+
+        multitoneSpectrumChart.data.datasets[0].data = inputAmplitudes;
+        multitoneSpectrumChart.data.datasets[1].data = outputAmplitudes;
+        multitoneSpectrumChart.data.datasets[1].label = `Salida, R = ${R} Ω`;
+        multitoneSpectrumChart.update("none");
+
+        document.getElementById("multitoneStatus").textContent =
+            `RK4 • dt = ${(dt * 1e6).toFixed(0)} µs • R = ${R} Ω • ` +
+            `Ganancia: ${frequencies.map((f, i) => `${f} Hz ${gainsDb[i] >= 0 ? "+" : ""}${gainsDb[i].toFixed(1)} dB`).join(" | ")}`;
+    };
+
+    resistanceSelect.addEventListener("change", updateChart);
+    updateChart();
+}
+
+function initBodeFigure() {
+    const resistanceSelect = document.getElementById("bodeResistance");
+    const resistances = [10, 50, 100, 200];
+    const colors = ["#ef4444", "#f59e0b", "#22c55e", "#38bdf8"];
+    const frequenciesOfInterest = [5, 50, 500];
+    const magnitudeOptions = makeFigureLineOptions("Frecuencia f [Hz], escala logarítmica", "Ganancia |H| [dB]", "logarithmic");
+    const phaseOptions = makeFigureLineOptions("Frecuencia f [Hz], escala logarítmica", "Fase [grados]", "logarithmic");
+    magnitudeOptions.scales.x.min = 1;
+    magnitudeOptions.scales.x.max = 1000;
+    magnitudeOptions.scales.y.min = -65;
+    magnitudeOptions.scales.y.max = 16;
+    phaseOptions.scales.x.min = 1;
+    phaseOptions.scales.x.max = 1000;
+    phaseOptions.scales.y.min = -190;
+    phaseOptions.scales.y.max = 10;
+
+    bodeMagnitudeChart = createFigureChart("chartBodeMagnitude", {
+        type: "line",
+        data: { datasets: [] },
+        options: magnitudeOptions
+    });
+    bodePhaseChart = createFigureChart("chartBodePhase", {
+        type: "line",
+        data: { datasets: [] },
+        options: phaseOptions
+    });
+    if (!resistanceSelect || !bodeMagnitudeChart || !bodePhaseChart) return;
+
+    const bodeResults = resistances.map((R, index) => {
+        const result = RLCEngine.calculateBode(R, 0.5, 200e-6, 181);
+        return {
+            R,
+            color: colors[index],
+            data: result.freqs.map((frequency, i) => ({ x: frequency, y: result.mag_db[i] })),
+            phase: result.freqs.map((frequency, i) => ({ x: frequency, y: result.phase_deg[i] }))
+        };
+    });
+
+    bodeMagnitudeChart.data.datasets = bodeResults.map(result => ({
+        label: `R = ${result.R} Ω`,
+        data: result.data,
+        borderColor: result.color,
+        borderWidth: 2,
+        pointRadius: 0
+    }));
+    const naturalFrequency = RLCEngine.calculateParameters(50, 0.5, 200e-6).f_n;
+    bodeMagnitudeChart.data.datasets.push({
+        label: `f_n = ${naturalFrequency.toFixed(2)} Hz`,
+        data: [{ x: naturalFrequency, y: -65 }, { x: naturalFrequency, y: 16 }],
+        borderColor: "rgba(255, 255, 255, 0.7)",
+        borderDash: [3, 4],
+        borderWidth: 1.2,
+        pointRadius: 0
+    });
+    bodePhaseChart.data.datasets = bodeResults.map(result => ({
+        label: `R = ${result.R} Ω`,
+        data: result.phase,
+        borderColor: result.color,
+        borderWidth: 2,
+        pointRadius: 0
+    }));
+    bodePhaseChart.data.datasets.push({
+        label: `f_n = ${naturalFrequency.toFixed(2)} Hz`,
+        data: [{ x: naturalFrequency, y: -190 }, { x: naturalFrequency, y: 10 }],
+        borderColor: "rgba(255, 255, 255, 0.7)",
+        borderDash: [3, 4],
+        borderWidth: 1.2,
+        pointRadius: 0
+    });
+
+    const updateBodeSelection = () => {
+        const selected = resistanceSelect.value;
+        const visibleResistances = selected === "all" ? resistances : [Number(selected)];
+
+        bodeMagnitudeChart.data.datasets.slice(0, resistances.length).forEach(dataset => {
+            dataset.hidden = selected !== "all" && dataset.label !== `R = ${selected} Ω`;
+        });
+        bodePhaseChart.data.datasets.slice(0, resistances.length).forEach(dataset => {
+            dataset.hidden = selected !== "all" && dataset.label !== `R = ${selected} Ω`;
+        });
+        bodeMagnitudeChart.update("none");
+        bodePhaseChart.update("none");
+
+        document.getElementById("bodeMetrics").innerHTML = visibleResistances.map(R => {
+            const gains = frequenciesOfInterest.map(frequency =>
+                RLCEngine.calculateFrequencyResponse(R, 0.5, 200e-6, frequency).gainDb
+            );
+            return `<tr><td>${R}</td>${gains.map(gain => `<td>${gain.toFixed(2)}</td>`).join("")}</tr>`;
+        }).join("");
+
+        document.getElementById("bodeStatus").textContent =
+            `Frecuencia natural: ${naturalFrequency.toFixed(2)} Hz • Pendiente asintótica en altas frecuencias: −40 dB/década`;
+    };
+
+    resistanceSelect.addEventListener("change", updateBodeSelection);
+    updateBodeSelection();
 }
 
 /**

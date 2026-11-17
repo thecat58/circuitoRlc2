@@ -13,13 +13,14 @@
 ## ESTRUCTURA GENERAL DE LA DEFENSA
 * **Tiempo Total de Exposición:** 15 minutos exactos (3 minutos y 45 segundos por integrante).
 * **Sesión de Preguntas y Sustentación:** 5 minutos adicionales ante el docente evaluador.
-* **Material de Apoyo:** Diapositivas con las 4 figuras generadas (`figura1` a `figura4`) y reproducción en vivo de los audios (`audio_original.wav` y `audio_filtrado_submarino.wav`).
+* **Material de Apoyo:** Sitio web con las cuatro simulaciones interactivas y reproducción comparativa de los audios (`audio_original.wav` y `audio_filtrado_submarino.wav`).
+* **Reparto por enfoque:** Jessica y Kevin presentan la matemática; Alvaro y Jorge presentan la implementación, los resultados y la aplicación.
 
 ```
-00:00 - 03:45 | JESSICA ACOSTA  | Introducción, KVL, Deducción de EDO, omega_n, R_cr y Discriminantes
-03:45 - 07:30 | KEVIN BERMUDEZ  | Solución Analítica Escalón 12V, Régimen Transitorio y Analogía Mecánica
-07:30 - 11:15 | ALVARO LOPEZ    | Algoritmo RK4, Espacio de Estados y Validación Numérica vs Analítica
-11:15 - 15:00 | JORGE MUÑOZ     | Filtrado Multi-seno, Diagrama de Bode, Demo de Audio y Conclusión Técnica
+00:00 - 03:45 | JESSICA ACOSTA  | MATEMÁTICA: KVL, EDO, parámetros y regímenes
+03:45 - 07:30 | KEVIN BERMUDEZ  | MATEMÁTICA: solución exacta, sobreimpulso y analogía
+07:30 - 11:15 | ALVARO LOPEZ    | CÓDIGO: RK4, respuesta al escalón y validación
+11:15 - 15:00 | JORGE MUÑOZ     | CÓDIGO/APLICACIÓN: multitono, Bode, audio y conclusión
 15:00 - 20:00 | TODOS           | Sesión de Preguntas y Respuestas con el Docente Evaluador
 ```
 
@@ -30,7 +31,7 @@
 ---
 
 ### INTEGRANTE 1: JESSICA VANESA ACOSTA GALINDEZ
-**Rol:** Introducción teórica, formulación física y clasificación analítica de regímenes  
+**Rol:** Matemática — introducción, formulación física y clasificación analítica de regímenes
 **Tiempo Asignado:** Minuto 0:00 a 03:45 (Duración: 3 min 45 s)
 
 #### [00:00 - 00:45] Saludo, Contexto e Introducción al Problema
@@ -68,7 +69,7 @@
 ---
 
 ### INTEGRANTE 2: KEVIN DANIEL BERMUDEZ ZAMORA
-**Rol:** Solución analítica detallada del escalón de 12 V y tabla de analogía física  
+**Rol:** Matemática — solución analítica detallada del escalón de 12 V y analogía física
 **Tiempo Asignado:** Minuto 03:45 a 07:30 (Duración: 3 min 45 s)
 
 #### [03:45 - 04:50] Solución Homogénea y Particular de la EDO ($R = 10\,\Omega$)
@@ -112,7 +113,7 @@
 ---
 
 ### INTEGRANTE 3: ALVARO JOSE LOPEZ QUIRA
-**Rol:** Reducción computacional de la EDO, método Runge-Kutta 4 y validación analítica vs. simulación  
+**Rol:** Código — reducción computacional de la EDO, método Runge-Kutta 4 y validación analítica vs. simulación
 **Tiempo Asignado:** Minuto 07:30 a 11:15 (Duración: 3 min 45 s)
 
 #### [07:30 - 08:35] Reducción a Sistema de Primer Orden en Espacio de Estados
@@ -135,39 +136,30 @@
 > $$\vec{y}_{n+1} = \vec{y}_n + \frac{h}{6}(k_1 + 2k_2 + 2k_3 + k_4)$$  
 > Este método tiene un error de truncamiento local de orden $\mathcal{O}(h^5)$ y global de $\mathcal{O}(h^4)$, siendo vastamente superior al método clásico de Euler."*
 
-#### [09:40 - 11:15] Análisis de Resultados: Figura 1 (Validación) y Figura 2 (Regímenes)
-> *"Por favor observen en la diapositiva la **Figura 1** de nuestro informe.  
-> Contrastamos la curva analítica calculada por Kevin (línea azul continua) con las muestras simuladas por nuestro algoritmo RK4 con paso de $0.1\text{ ms}$ (puntos rojos). Como pueden observar en el panel superior, la superposición es absoluta.  
-> En el panel inferior graficamos el residuo exacto $|V_{C,\text{num}} - V_{C,\text{analit}}|$. El error máximo absoluto (norma $L_\infty$) en todo el intervalo de $400\text{ ms}$ fue de tan solo:  
+#### [09:40 - 11:15] Resultados Interactivos: Validación y Respuesta al Escalón
+> *"Ahora usamos la galería interactiva del sitio. En la **Figura 1** comparamos la solución analítica calculada por Kevin con la simulación RK4. Podemos cambiar el paso $dt$ y ver el error absoluto; con $dt = 0.1\text{ ms}$, el error máximo en los primeros $400\text{ ms}$ es:
 > $$\mathbf{3.69 \times 10^{-9}\text{ V} \quad (3.69\text{ nanovoltios})}$$  
-> Esto valida y certifica que tanto la deducción analítica a mano como el algoritmo numérico en Python son perfectamente correctos y rigurosos. Se corrobora además el pico máximo de $20.75\text{ V}$ en $31.57\text{ ms}$.  
-> Pasando a la **Figura 2**, comparamos el comportamiento transitorio al variar la resistencia:  
-> - La curva roja ($10\,\Omega$) oscila salvajemente antes de asentarse.  
-> - La curva naranja ($50\,\Omega$) amortigua el sobreimpulso a solo $13.9\text{ V}$.  
-> - La curva verde ($100\,\Omega$, amortiguamiento crítico) alcanza el valor de $12\text{ V}$ sin oscilaciones en apenas $40\text{ ms}$.  
-> - La curva azul ($200\,\Omega$, sobreamortiguado) tarda más de $150\text{ ms}$, evidenciando la pesadez del sistema.  
+> En la **Figura 2** están las cuatro curvas para el escalón de $12\text{ V}$ y una tabla que calcula el pico, sobreimpulso, tiempo al pico y asentamiento: $R=10\,\Omega$ alcanza $20.75\text{ V}$ con $72.9\%$ de sobreimpulso; $R=50\,\Omega$ llega a $13.96\text{ V}$ con $16.3\%$; $R=100\,\Omega$ no tiene sobreimpulso; y $R=200\,\Omega$ es el más lento. Al cambiar la ventana podemos ver que el caso de $10\,\Omega$ se asienta cerca de $384\text{ ms}$.
 > Ahora mi compañero Jorge explicará la aplicación del circuito como filtro de audio y la demostración acústica."*
 
 ---
 
 ### INTEGRANTE 4: JORGE ENRIQUE MUÑOZ DULCEY
-**Rol:** Filtrado de audio multi-tono, Diagrama de Bode, demostración sonora y conclusión ingenieril  
+**Rol:** Código y aplicación — simulación multitono, Diagrama de Bode, demostración sonora y conclusión ingenieril
 **Tiempo Asignado:** Minuto 11:15 a 15:00 (Duración: 3 min 45 s)
 
 #### [11:15 - 12:20] Filtrado de Señal Multi-tono Compuesta (Figura 3)
 > *"Muchas gracias Alvaro. Habiendo validado la física y el algoritmo, entramos en la aplicación del circuito como **filtro pasa-bajo de audio**.  
 > Para ponerlo a prueba, generamos computacionalmente una señal compleja compuesta por tres frecuencias:  
 > $$E(t) = \sin(2\pi \cdot 5 t) + \sin(2\pi \cdot 50 t) + \sin(2\pi \cdot 500 t)$$  
-> Recordando que la frecuencia de corte natural del circuito es $f_n \approx 15.9\text{ Hz}$:  
-> - La componente de $5\text{ Hz}$ es sub-corte ($f < f_n$).  
-> - La de $50\text{ Hz}$ está ligeramente por encima de corte.  
+> La frecuencia natural es $f_n \approx 15.9\text{ Hz}$; el punto exacto de $-3\text{ dB}$ depende del amortiguamiento.
+> - La componente de $5\text{ Hz}$ está por debajo de $f_n$.
+> - La de $50\text{ Hz}$ está por encima de $f_n$.
 > - La de $500\text{ Hz}$ es una frecuencia aguda lejana.  
-> Al pasar esta señal por el circuito e integrarla con RK4 (ver **Figura 3**):  
-> En el tiempo, la onda rugosa de entrada se purifica en una senoidal limpia.  
-> En el espectro FFT (panel derecho), para $R=50\,\Omega$, la componente de $5\text{ Hz}$ tiene una ganancia cercana a $+0.4\text{ dB}$; la de $50\text{ Hz}$ se atenúa aproximadamente **$-19.5\text{ dB}$** (queda cerca del $10.6\%$); y la de $500\text{ Hz}$, **$-59.9\text{ dB}$** (cerca del $0.1\%$). ¡El circuito elimina selectivamente las altas frecuencias!"*
+> En la **Figura 3**, la página integra con RK4 usando $dt=50\,\mu\text{s}$, compara entrada y salida y calcula las amplitudes de las tres frecuencias. Para $R=50\,\Omega$, la ganancia es aproximadamente $+0.4\text{ dB}$ a $5\text{ Hz}$, $-19.5\text{ dB}$ a $50\text{ Hz}$ y $-59.9\text{ dB}$ a $500\text{ Hz}$. Cambiar $R$ actualiza ambas gráficas."*
 
 #### [12:20 - 13:15] Análisis en Frecuencia: Diagrama de Bode (Figura 4)
-> *"Para generalizar este comportamiento a cualquier frecuencia, obtuvimos analíticamente la función de transferencia $H(s) = \frac{V_C(s)}{E(s)} = \frac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}$ y trazamos el **Diagrama de Bode** en magnitud y fase (**Figura 4**).  
+> *"Para generalizar este comportamiento a cualquier frecuencia, obtuvimos analíticamente la función de transferencia $H(s) = \frac{V_C(s)}{E(s)} = \frac{\omega_n^2}{s^2 + 2\zeta\omega_n s + \omega_n^2}$ y trazamos el **Diagrama de Bode** en magnitud y fase (**Figura 4**), que también se genera en la web.
 > Destacamos tres propiedades fundamentales:  
 > 1. En bajas frecuencias ($\omega \ll 100\text{ rad/s}$), la ganancia es plana en $0\text{ dB}$ (ganancia unitaria) y la fase es $0^\circ$.  
 > 2. En la resonancia ($\omega = 100\text{ rad/s}$), la fase cruza exactamente por $-90^\circ$. Para $R = 10\,\Omega$, la magnitud exhibe un pico resonante pronunciado de $+14\text{ dB}$.  
@@ -176,14 +168,14 @@
 #### [13:15 - 14:15] Demostración de Audio Real: El Efecto "Bajo el Agua"
 > *"Para llevar la teoría a una experiencia tangible, generamos un archivo de audio musical `.wav` de 44.1 kHz (`audio_original.wav`) que contiene acordes polifónicos con armónicos brillantes de cuerda hasta 4 kHz y chasquidos percusivos a 5 kHz.  
 > Luego, procesamos muestra a muestra las 154,350 muestras de audio integrando la EDO con RK4, produciendo `audio_filtrado_submarino.wav`.  
-> *(En este punto, Jorge reproduce 5 segundos de audio_original.wav y luego 5 segundos de audio_filtrado_submarino.wav)*  
+> *(En este punto, Jorge reproduce fragmentos cortos de audio_original.wav y audio_filtrado_submarino.wav.)*
 > Como acaban de escuchar, todos los agudos y la presencia brillante desaparecen, dejando únicamente un zumbido grave y apagado. Este es exactamente el **efecto de sonido subacuático** (*underwater filter*) que los productores de música utilizan para simular que la música proviene de una habitación contigua o debajo del agua."*
 
 #### [14:15 - 15:00] Conclusión Ingenieril y Cierre de la Exposición
 > *"Finalmente, respondiendo a la pregunta de diseño ingenieril: ¿Qué valor de $R$ elegiríamos para un ecualizador o control de tono de audio?  
 > - **Descartamos rotundamente $R = 10\,\Omega$:** Provoca un sobreimpulso del $72.9\%$ y resonancia de $+14\text{ dB}$, lo que distorsionaría el audio con un efecto parásito conocido como *ringing* y podría quemar los altavoces.  
 > - **Descartamos $R = 200\,\Omega$:** Provoca una atenuación lenta y opaca.  
-> - **Para una respuesta de amplitud Butterworth, elegiríamos $\zeta = \frac{1}{\sqrt{2}} \approx 0.707$ ($R \approx 70.7\,\Omega$)**: es máximamente plana en la banda de paso y no tiene pico resonante. **$R = 100\,\Omega$** es la alternativa crítica si priorizamos una respuesta temporal sin sobreimpulso. Butterworth no significa retardo de grupo constante ni fase sin distorsión.  
+> - **Para una respuesta de amplitud Butterworth, elegiríamos $\zeta = \frac{1}{\sqrt{2}} \approx 0.707$ ($R \approx 70.7\,\Omega$)**: es máximamente plana en la banda de paso y no tiene pico resonante. **$R = 100\,\Omega$** es la alternativa crítica si priorizamos una respuesta temporal sin sobreimpulso. Butterworth no significa retardo de grupo constante ni fase sin distorsión.
 > Con esto concluimos nuestra presentación. Agradecemos su atención y quedamos a disposición de sus preguntas. ¡Muchas gracias!"*
 
 ---

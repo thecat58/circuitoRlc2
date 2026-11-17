@@ -337,9 +337,9 @@ def generar_figura3_filtrado_multitono():
     ax_t.grid(True)
     ax_t.legend(loc='upper right', framealpha=0.9)
     
-    # Análisis Espectral por Transformada Rápida de Fourier (FFT) en estado estacionario
-    # Usamos la segunda mitad de la señal (0.5 s a 1.0 s)
-    mask_fft = t_span >= 0.5
+    # Ventana coherente de 0.8 s: contiene 4, 40 y 400 ciclos de 5, 50 y 500 Hz.
+    # Excluimos el extremo final para evitar duplicar una muestra en la FFT.
+    mask_fft = (t_span >= 0.2) & (t_span < 1.0)
     N_fft = np.sum(mask_fft)
     freqs = np.fft.rfftfreq(N_fft, d=(t_span[1] - t_span[0]))
     fft_in = np.abs(np.fft.rfft(entrada[mask_fft])) * (2.0 / N_fft)
